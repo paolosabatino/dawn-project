@@ -92,7 +92,6 @@ void waitLoop(int dl) {
 //    delay(10);
     yield();
     if (ap_started == 1 || wifi_connected == 1) {
-      serverHandleClient();
       handleOTA();
     }
   }
@@ -102,13 +101,6 @@ void networkLoop() {
 
   static uint32_t last_cycle = 0;
   static uint32_t softap_last_check = millis();
-
-  if (wifi_connected == 1 || ap_started == 1) {
-    serverHandleClient();
-
-  }
-
-
 
   if (wifi_connected == 1) {
 

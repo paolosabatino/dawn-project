@@ -169,7 +169,7 @@ var objToQueryString = function(obj) {
 
 var getRadioValue = function() {
 	
-	var obj = document.getElementById("radio-mode-div");
+	var obj = document.getElementById("mode-setting");
 	
 	return obj.dataset['value'];
 	
@@ -400,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		
 		radio.addEventListener("click", function(evt) {
 			
-			var divMode = document.getElementById("radio-mode-div");
+			var divMode = document.getElementById("mode-setting");
 			divMode.dataset['value'] = evt.target.dataset['value']
 			
 			timeUpdate('mode');
