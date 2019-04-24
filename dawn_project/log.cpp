@@ -7,6 +7,7 @@ void setupLog(uint32_t bps) {
   
 }
 
+/*
 void log(const char *fmt, ...) {
 
   char buf[128]; // resulting string limited to 128 chars
@@ -17,4 +18,4 @@ void log(const char *fmt, ...) {
   Serial.print(buf);
   
 }
-
+*/

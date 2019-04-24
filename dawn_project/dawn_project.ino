@@ -34,7 +34,7 @@ uint8_t ap_started = 0;
 uint8_t wifi_connected = 0;
 
 /*
-   fade to mood mode variables
+	 fade to mood mode variables
 */
 uint32_t ftm_ts_begin;
 uint32_t ftm_ts_end;
@@ -45,468 +45,472 @@ struct Config config;
 
 void setupPwm() {
 
-  // PWM setup
-  uint32 io_info[PWM_CHANNELS][3] = {
-    // MUX, FUNC, PIN
-    {PERIPHS_IO_MUX_GPIO4_U, FUNC_GPIO4, RED_PIN},
-    {PERIPHS_IO_MUX_MTCK_U,  FUNC_GPIO13, GREEN_PIN},
-    {PERIPHS_IO_MUX_MTDI_U,  FUNC_GPIO12, BLUE_PIN}
+	// PWM setup
+	uint32 io_info[PWM_CHANNELS][3] = {
+		// MUX, FUNC, PIN
+		{PERIPHS_IO_MUX_GPIO4_U, FUNC_GPIO4, RED_PIN},
+		{PERIPHS_IO_MUX_MTCK_U,  FUNC_GPIO13, GREEN_PIN},
+		{PERIPHS_IO_MUX_MTDI_U,  FUNC_GPIO12, BLUE_PIN}
 
-  };
+	};
 
-  pinMode(RED_PIN, OUTPUT);
-  pinMode(GREEN_PIN, OUTPUT);
-  pinMode(BLUE_PIN, OUTPUT);
-  //pinMode(10, INPUT);
+	pinMode(RED_PIN, OUTPUT);
+	pinMode(GREEN_PIN, OUTPUT);
+	pinMode(BLUE_PIN, OUTPUT);
+	//pinMode(10, INPUT);
 
-  // initial duty: all off
-  uint32_t pwm_duty_init[PWM_CHANNELS] = {0, 0, 0};
+	// initial duty: all off
+	uint32_t pwm_duty_init[PWM_CHANNELS] = {0, 0, 0};
 
-  pwm_init(pwm_period, pwm_duty_init, PWM_CHANNELS, io_info);
-  pwm_start();
+	pwm_init(pwm_period, pwm_duty_init, PWM_CHANNELS, io_info);
+	pwm_start();
 
 }
 
 /**
-   Initializes the configuration to default values, to be used in case retrieveConfig() fails
+	 Initializes the configuration to default values, to be used in case retrieveConfig() fails
 */
 void defaultConfig() {
 
-  config.red_max_ramp = MAX_RAMP;
-  config.green_max_ramp = MAX_RAMP;
-  config.blue_max_ramp = MAX_RAMP;
+	config.red_max_ramp = MAX_RAMP;
+	config.green_max_ramp = MAX_RAMP;
+	config.blue_max_ramp = MAX_RAMP;
 
-  config.mood_lamp_begin_dawn = 12 * SECS_PER_HOUR + 0 * SECS_PER_MINUTE + 0;
-  config.mood_lamp_begin_full = 12 * SECS_PER_HOUR + 15 * SECS_PER_MINUTE + 0;
-  config.mood_lamp_end_full = 12 * SECS_PER_HOUR + 30 * SECS_PER_MINUTE + 0;
-  config.mood_lamp_end_dawn = 12 * SECS_PER_HOUR + 45 * SECS_PER_MINUTE + 0;
+	config.mood_lamp_begin_dawn = 12 * SECS_PER_HOUR + 0 * SECS_PER_MINUTE + 0;
+	config.mood_lamp_begin_full = 12 * SECS_PER_HOUR + 15 * SECS_PER_MINUTE + 0;
+	config.mood_lamp_end_full = 12 * SECS_PER_HOUR + 30 * SECS_PER_MINUTE + 0;
+	config.mood_lamp_end_dawn = 12 * SECS_PER_HOUR + 45 * SECS_PER_MINUTE + 0;
 
-  memset(config.ssid, 0, sizeof(config.ssid));
-  memset(config.passwd, 0, sizeof(config.passwd));
+	memset(config.ssid, 0, sizeof(config.ssid));
+	memset(config.passwd, 0, sizeof(config.passwd));
 
 }
 
 void waitLoop(int dl) {
-  int lt = millis();
-  while (millis() - lt < dl) {
+	int lt = millis();
+	while (millis() - lt < dl) {
 //    delay(10);
-    yield();
-    if (ap_started == 1 || wifi_connected == 1) {
-      handleOTA();
-    }
-  }
+		yield();
+		if (ap_started == 1 || wifi_connected == 1) {
+			handleOTA();
+		}
+	}
 }
 
 void networkLoop() {
 
-  static uint32_t last_cycle = 0;
-  static uint32_t softap_last_check = millis();
+	static uint32_t last_cycle = 0;
+	static uint32_t softap_last_check = millis();
 
-  if (wifi_connected == 1) {
+	if (wifi_connected == 1) {
 
-    if (ap_started == 1) {
-      WiFi.softAPdisconnect(true);
-      ap_started = 0;
-    }
+		if (ap_started == 1) {
+			WiFi.softAPdisconnect(true);
+			ap_started = 0;
+		}
 
-  } else {
+	} else {
 
-    if (ap_started == 0) {
-      if (millis() - softap_last_check > SOFTAP_TIMEOUT_SPAWN) {
-        log("Spawning mood_lamp network SSID\n");
-        WiFi.softAP("mood_lamp");
-        ap_started = 1;
-      }
-    } else {
-      softap_last_check = millis();
-    }
+		if (ap_started == 0) {
+			if (millis() - softap_last_check > SOFTAP_TIMEOUT_SPAWN) {
+				log("Spawning mood_lamp network SSID\n");
+				WiFi.softAP("mood_lamp");
+				ap_started = 1;
+			}
+		} else {
+			softap_last_check = millis();
+		}
 
-    if (millis() - last_cycle > NETWORK_PEEK_TIME_MS) {
+		if (millis() - last_cycle > NETWORK_PEEK_TIME_MS) {
 
-      if (WiFi.status() == WL_CONNECTED) {
+			if (WiFi.status() == WL_CONNECTED) {
 
-        char localIp[16];
-        WiFi.localIP().toString().toCharArray(localIp, 16);
-        log("Connected to %s\nIP Address: %s\n", config.ssid, localIp);
+				char localIp[16];
+				WiFi.localIP().toString().toCharArray(localIp, 16);
+				log("Connected to %s\nIP Address: %s\n", config.ssid, localIp);
 
-        if (MDNS.begin ("mood_lamp"))
-          log("MDNS responder started\n");
+				if (MDNS.begin ("mood_lamp"))
+					log("MDNS responder started\n");
 
-        ntpSetup();
+				ntpSetup();
 
-        wifi_connected = 1;
+				wifi_connected = 1;
 
-      }
+			}
 
-      last_cycle = millis();
+			last_cycle = millis();
 
-    }
+		}
 
-  }
+	}
 
 }
 
 void setup() {
 
-  setupLog(115200);
-  //analogWriteFreq(1000);
-  setupPwm();
-  configSetup();
+	setupLog(115200);
+	//analogWriteFreq(1000);
+	setupPwm();
+	configSetup();
 
-  log("Boot\n");
+	log("Boot\n");
 
-  if (retrieveConfig(&config) == 1) {
-    log("Configuration CRC does not match, using defaults\n");
-    defaultConfig();
-  }
+	if (retrieveConfig(&config) == 1) {
+		log("Configuration CRC does not match, using defaults\n");
+		defaultConfig();
+	}
 
-  srcRed = 0;
-  srcGreen = 0;
-  srcBlue = 0;
+	srcRed = 0;
+	srcGreen = 0;
+	srcBlue = 0;
 
-  destRed = MAX_RAMP;
-  destGreen = MAX_RAMP;
-  destBlue = 0;
+	destRed = MAX_RAMP;
+	destGreen = MAX_RAMP;
+	destBlue = 0;
 
-  stp = 0;
+	stp = 0;
 
-  if (SPIFFS.begin()) {
-    log("SPIFFS mounted\n");
-  } else {
-    log("SPIFFS error\n");
-  }
+	if (SPIFFS.begin()) {
+		log("SPIFFS mounted\n");
+	} else {
+		log("SPIFFS error\n");
+	}
 
-  /*
-     Connect to network at this point or just skip the step. SoftAP mode will be
-     enabled later if we are not a client of a network yet.
-  */
-  if (strlen(config.ssid) > 0 && strlen(config.passwd) > 0) {
-    log("Connecting to network %s\n", config.ssid);
-    WiFi.begin (config.ssid, config.passwd);
-  } else {
-    log("No network SSID or password stored\n");
-  }
+	/*
+		 Connect to network at this point or just skip the step. SoftAP mode will be
+		 enabled later if we are not a client of a network yet.
+	*/
+	if (strlen(config.ssid) > 0 && strlen(config.passwd) > 0) {
+		log("Connecting to network %s\n", config.ssid);
+		WiFi.begin (config.ssid, config.passwd);
+	} else {
+		log("No network SSID or password stored\n");
+	}
 
-  WiFi.begin();
-  WiFi.setOutputPower(OUTPUT_POWER_DB);
-  WiFi.softAPdisconnect(true);
+	WiFi.begin();
+	WiFi.setOutputPower(OUTPUT_POWER_DB);
+	WiFi.softAPdisconnect(true);
 
-  serverSetup(&config);
-  log("HTTP server started\n");
+	serverSetup(&config);
+	log("HTTP server started\n");
 
-  pinMode(ANALOG_PIN, INPUT);
+	pinMode(ANALOG_PIN, INPUT);
 
-  //working_mode = WORKING_MODE_MOOD_LAMP;
-  //set_light_mood_lamp();
-  working_mode = WORKING_MODE_CYCLE_FREE;
-  //set_light_
+	//working_mode = WORKING_MODE_MOOD_LAMP;
+	//set_light_mood_lamp();
+	working_mode = WORKING_MODE_CYCLE_FREE;
+	//set_light_
 
 }
 
 void do_light_cycle() {
 
-  time_t curtime;
+	time_t curtime;
 
-  if (stp < MAX_RAMP)    
-    stp++;
+	if (stp < MAX_RAMP)    
+		stp++;
 
-  if (stp >= MAX_RAMP) {
+	if (stp >= MAX_RAMP) {
 
-    if (light_cycle_wait_period <= 0) {
+		if (light_cycle_wait_period <= 0) {
 
-      srcRed = destRed;
-      srcGreen = destGreen;
-      srcBlue = destBlue;
-  
-      destRed = random(0, config.red_max_ramp);
-      destGreen = random(0, config.green_max_ramp);
-      destBlue = random(0, config.blue_max_ramp);
-  
-      curtime = now();
-  
-      log("Time:%d:%d:%d\tNew dest color:%d\t%d\t%d, pin10:%d\n",
-          hour(curtime),
-          minute(curtime),
-          second(curtime),
-          destRed,
-          destGreen,
-          destBlue,
-          digitalRead(10)
-         );
-  
-      stp = 0;
-      light_cycle_wait_period = LIGHT_CYCLE_INTERPERIOD;
-      
-    } else {
-      
-      waitLoop(1000);
-      light_cycle_wait_period--;
-      
-    }
+			srcRed = destRed;
+			srcGreen = destGreen;
+			srcBlue = destBlue;
+	
+			destRed = random(0, config.red_max_ramp);
+			destGreen = random(0, config.green_max_ramp);
+			destBlue = random(0, config.blue_max_ramp);
+	
+			curtime = now();
+	
+			log("Time:%d:%d:%d\tNew dest color:%d\t%d\t%d, pin10:%d\n",
+					hour(curtime),
+					minute(curtime),
+					second(curtime),
+					destRed,
+					destGreen,
+					destBlue,
+					digitalRead(10)
+				 );
+	
+			stp = 0;
+			light_cycle_wait_period = LIGHT_CYCLE_INTERPERIOD;
+			
+		} else {
+			
+			waitLoop(1000);
+			light_cycle_wait_period--;
+			
+		}
 
-  }
+	}
 
 }
 
 void set_light_off() {
 
-  srcRed = 0;
-  srcGreen = 0;
-  srcBlue = 0;
+	srcRed = 0;
+	srcGreen = 0;
+	srcBlue = 0;
 
-  destRed = 0;
-  destGreen = 0;
-  destBlue = 0;
+	destRed = 0;
+	destGreen = 0;
+	destBlue = 0;
 
-  stp = 0;
+	stp = 0;
 
 }
 
 void set_light_static_day() {
 
-  srcRed = config.red_max_ramp;
-  srcGreen = config.green_max_ramp;
-  srcBlue = config.blue_max_ramp;
+	srcRed = config.red_max_ramp;
+	srcGreen = config.green_max_ramp;
+	srcBlue = config.blue_max_ramp;
 
-  destRed = 0;
-  destGreen = 0;
-  destBlue = 0;
+	destRed = 0;
+	destGreen = 0;
+	destBlue = 0;
 
-  stp = 0;
+	stp = 0;
 
 }
 
 void set_light_static_night() {
 
-  srcRed = config.red_max_ramp;
-  srcGreen = (config.green_max_ramp >> 2) + (config.green_max_ramp >> 3);
-  srcBlue = 0;
+	srcRed = config.red_max_ramp;
+	srcGreen = (config.green_max_ramp >> 2) + (config.green_max_ramp >> 3);
+	srcBlue = 0;
 
-  destRed = 0;
-  destGreen = 0;
-  destBlue = 0;
+	destRed = 0;
+	destGreen = 0;
+	destBlue = 0;
 
-  stp = 0;
+	stp = 0;
 
 }
 
 void set_light_cycle_free() {
 
-  light_cycle_wait_period = LIGHT_CYCLE_INTERPERIOD;
+	light_cycle_wait_period = LIGHT_CYCLE_INTERPERIOD;
 
 }
 
 void set_light_mood_lamp() {
 
-  destRed = config.red_max_ramp;
-  destGreen = config.green_max_ramp;
-  destBlue = config.blue_max_ramp;
+	destRed = config.red_max_ramp;
+	destGreen = config.green_max_ramp;
+	destBlue = config.blue_max_ramp;
 
-  srcRed = 0;
-  srcGreen = 0;
-  srcBlue = 0;
+	srcRed = 0;
+	srcGreen = 0;
+	srcBlue = 0;
 
-  stp = 0;
+	stp = 0;
 
 }
 
 void set_light_fade_to_mood() {
 
-  uint32_t red;
-  uint32_t green;
-  uint32_t blue;
-  uint32_t cur_time;
-  time_t now_time;
+	uint32_t red;
+	uint32_t green;
+	uint32_t blue;
+	uint32_t cur_time;
+	time_t now_time;
 
-  red = (srcRed * (MAX_RAMP - stp) + destRed * stp) >> RAMP_BITS;
-  green = (srcGreen * (MAX_RAMP - stp) + destGreen * stp) >> RAMP_BITS;
-  blue = (srcBlue * (MAX_RAMP - stp) + destBlue * stp) >> RAMP_BITS;
+	red = (srcRed * (MAX_RAMP - stp) + destRed * stp) >> RAMP_BITS;
+	green = (srcGreen * (MAX_RAMP - stp) + destGreen * stp) >> RAMP_BITS;
+	blue = (srcBlue * (MAX_RAMP - stp) + destBlue * stp) >> RAMP_BITS;
 
-  srcRed = red;
-  srcGreen = green;
-  srcBlue = blue;
+	srcRed = red;
+	srcGreen = green;
+	srcBlue = blue;
 
-  destRed = 0;
-  destGreen = 0;
-  destBlue = 0;
+	destRed = 0;
+	destGreen = 0;
+	destBlue = 0;
 
-  now_time = now();
-  ftm_ts_begin = time_to_day_timestamp(now_time);
-  ftm_ts_end = ftm_ts_begin + (5 * SECS_PER_MINUTE);
+	now_time = now();
+	ftm_ts_begin = time_to_day_timestamp(now_time);
+	ftm_ts_end = ftm_ts_begin + (5 * SECS_PER_MINUTE);
 
-  log("Fade to Mood starts at %d:%d:%d, ends in 5 minutes. Current rgb %d %d %d\n",
-      hour(now_time),
-      minute(now_time),
-      second(now_time),
-      red,
-      green,
-      blue
-     );
+	log("Fade to Mood starts at %d:%d:%d, ends in 5 minutes. Current rgb %d %d %d\n",
+			hour(now_time),
+			minute(now_time),
+			second(now_time),
+			red,
+			green,
+			blue
+		 );
 
 }
 
 uint32_t time_to_day_timestamp(time_t time_value) {
 
-  return hour(time_value) * SECS_PER_HOUR + minute(time_value) * SECS_PER_MINUTE + second(time_value);
+	return hour(time_value) * SECS_PER_HOUR + minute(time_value) * SECS_PER_MINUTE + second(time_value);
 
 }
 
 uint8_t is_time_between(uint32_t ts_begin, uint32_t ts_end, uint32 ts_test) {
 
-  if (ts_end < ts_begin) {
-    if (ts_test <= ts_end || ts_test >= ts_begin)
-      return 1;
-  } else {
-    if (ts_test >= ts_begin && ts_test <= ts_end)
-      return 1;
-  }
+	if (ts_end < ts_begin) {
+		if (ts_test <= ts_end || ts_test >= ts_begin)
+			return 1;
+	} else {
+		if (ts_test >= ts_begin && ts_test <= ts_end)
+			return 1;
+	}
 
-  return 0;
+	return 0;
 
 }
 
 uint16_t get_ramp_time_diff(uint32_t ts_begin, uint32_t ts_end, uint32_t ts_value) {
 
-  int32_t interval_seconds = ts_end - ts_begin;
-  int32_t pos_in_interval = ts_value - ts_begin;
+	int32_t interval_seconds = ts_end - ts_begin;
+	int32_t pos_in_interval = ts_value - ts_begin;
 
-  if (interval_seconds < 0)
-    interval_seconds += 24 * SECS_PER_HOUR;
+	if (interval_seconds < 0)
+		interval_seconds += 24 * SECS_PER_HOUR;
 
-  if (pos_in_interval < 0)
-    pos_in_interval += 24 * SECS_PER_HOUR;
+	if (pos_in_interval < 0)
+		pos_in_interval += 24 * SECS_PER_HOUR;
 
-  log("interval seconds:%d pos: %d\n", interval_seconds, pos_in_interval);
+	log("interval seconds:%d pos: %d\n", interval_seconds, pos_in_interval);
 
-  if (pos_in_interval < 0)
-    return 0;
+	if (pos_in_interval < 0)
+		return 0;
 
-  if (pos_in_interval > interval_seconds)
-    return MAX_RAMP;
+	if (pos_in_interval > interval_seconds)
+		return MAX_RAMP;
 
-  return (pos_in_interval * (uint32_t)(MAX_RAMP)) / interval_seconds;
+	return (pos_in_interval * (uint32_t)(MAX_RAMP)) / interval_seconds;
 
 }
 
 void do_off() {
 
-  waitLoop(1000);
+	waitLoop(1000);
 
 }
 
 void do_static_light() {
 
-  waitLoop(1000);
+	waitLoop(1000);
 
 }
 
 void do_mood_lamp() {
 
-  uint32_t cur_time;
-  time_t now_time;
+	uint32_t cur_time;
+	time_t now_time;
 
-  now_time = now();
-  cur_time = time_to_day_timestamp(now_time);
+	now_time = now();
+	cur_time = time_to_day_timestamp(now_time);
 
-  log("Time:%d:%d:%d\n",
-      hour(now_time),
-      minute(now_time),
-      second(now_time)
-     );
+	log("Time:%d:%d:%d\n",
+			hour(now_time),
+			minute(now_time),
+			second(now_time)
+		 );
 
-  if (is_time_between(config.mood_lamp_begin_dawn, config.mood_lamp_begin_full, cur_time)) {
+	if (is_time_between(config.mood_lamp_begin_dawn, config.mood_lamp_begin_full, cur_time)) {
 
-    log("Time is between dawn and full\n");
-    stp = get_ramp_time_diff(config.mood_lamp_begin_dawn, config.mood_lamp_begin_full, cur_time);
+		log("Time is between dawn and full\n");
+		stp = get_ramp_time_diff(config.mood_lamp_begin_dawn, config.mood_lamp_begin_full, cur_time);
 
-  } else if (is_time_between(config.mood_lamp_begin_full, config.mood_lamp_end_full, cur_time)) {
+	} else if (is_time_between(config.mood_lamp_begin_full, config.mood_lamp_end_full, cur_time)) {
 
-    log("Time is full\n");
-    stp = MAX_RAMP;
+		log("Time is full\n");
+		stp = MAX_RAMP;
 
-  } else if (is_time_between(config.mood_lamp_end_full, config.mood_lamp_end_dawn, cur_time)) {
+	} else if (is_time_between(config.mood_lamp_end_full, config.mood_lamp_end_dawn, cur_time)) {
 
-    log("Time is between full and dawn\n");
-    stp = MAX_RAMP - get_ramp_time_diff(config.mood_lamp_end_full, config.mood_lamp_end_dawn, cur_time);
+		log("Time is between full and dawn\n");
+		stp = MAX_RAMP - get_ramp_time_diff(config.mood_lamp_end_full, config.mood_lamp_end_dawn, cur_time);
 
-  }
+	}
 
-  waitLoop(1000);
+	waitLoop(1000);
 
 }
 
 void do_fade_to_mood() {
 
-  uint32_t cur_time;
-  time_t now_time;
+	uint32_t cur_time;
+	time_t now_time;
 
-  now_time = now();
-  cur_time = time_to_day_timestamp(now_time);
+	now_time = now();
+	cur_time = time_to_day_timestamp(now_time);
 
-  stp = get_ramp_time_diff(ftm_ts_begin, ftm_ts_end, cur_time);
+	stp = get_ramp_time_diff(ftm_ts_begin, ftm_ts_end, cur_time);
 
-  if (stp == MAX_RAMP) {
-    log("fade to mood complete, set mood lamp working mode\n");
-    set_light_mood_lamp();
-    working_mode = WORKING_MODE_MOOD_LAMP;
-  }
+	if (stp == MAX_RAMP) {
+		log("fade to mood complete, set mood lamp working mode\n");
+		set_light_mood_lamp();
+		working_mode = WORKING_MODE_MOOD_LAMP;
+	}
 
-  waitLoop(250);
+	waitLoop(250);
 
 }
 
 void loop() {
 
-  uint16_t red, green, blue;
+	uint16_t red, green, blue;
 
-  // put your main code here, to run repeatedly:
-  networkLoop();
+	// put your main code here, to run repeatedly:
+	networkLoop();
 
-  switch (working_mode) {
-    case WORKING_MODE_OFF:
-    default:
-      do_off();
-      break;
-    case WORKING_MODE_STATIC_DAY:
-      set_light_static_day();
-      do_static_light();
-      break;
-    case WORKING_MODE_STATIC_NIGHT:
-      set_light_static_night();
-      do_static_light();
-      break;
-    case WORKING_MODE_CYCLE_FREE:
-      do_light_cycle();
-      break;
-    case WORKING_MODE_MOOD_LAMP:
-      do_mood_lamp();
-      break;
-    case WORKING_MODE_FADE_TO_MOOD:
-      do_fade_to_mood();
-      break;
-  }
+	switch (working_mode) {
+		case WORKING_MODE_OFF:
+		default:
+			do_off();
+			break;
+		case WORKING_MODE_STATIC_DAY:
+			set_light_static_day();
+			do_static_light();
+			break;
+		case WORKING_MODE_STATIC_NIGHT:
+			set_light_static_night();
+			do_static_light();
+			break;
+		case WORKING_MODE_CYCLE_FREE:
+			do_light_cycle();
+			break;
+		case WORKING_MODE_MOOD_LAMP:
+			do_mood_lamp();
+			break;
+		case WORKING_MODE_FADE_TO_MOOD:
+			do_fade_to_mood();
+			break;
+	}
 
-  red = (srcRed * (MAX_RAMP - stp) + destRed * stp) >> RAMP_BITS;
-  green = (srcGreen * (MAX_RAMP - stp) + destGreen * stp) >> RAMP_BITS;
-  blue = (srcBlue * (MAX_RAMP - stp) + destBlue * stp) >> RAMP_BITS;
+	//red = srcRed - (((srcRed + destRed) * stp) >> RAMP_BITS);
+	//green = srcGreen - (((srcGreen + destGreen) * stp) >> RAMP_BITS);
+	//blue = srcBlue - (((srcBlue + destBlue) * stp) >> RAMP_BITS);
 
-  /*
-    analogWrite(RED_PIN, gamma10[red]);
-    analogWrite(GREEN_PIN, gamma10[green]);
-    analogWrite(BLUE_PIN, gamma10[blue]);
-  */
+	red = (srcRed * (MAX_RAMP - stp) + destRed * stp) >> RAMP_BITS;
+	green = (srcGreen * (MAX_RAMP - stp) + destGreen * stp) >> RAMP_BITS;
+	blue = (srcBlue * (MAX_RAMP - stp) + destBlue * stp) >> RAMP_BITS;
 
-  red = (gamma10[red] * pwm_period) >> RAMP_BITS;
-  green = (gamma10[green] * pwm_period) >> RAMP_BITS;
-  blue = (gamma10[blue] * pwm_period) >> RAMP_BITS;
+	/*
+		analogWrite(RED_PIN, gamma10[red]);
+		analogWrite(GREEN_PIN, gamma10[green]);
+		analogWrite(BLUE_PIN, gamma10[blue]);
+	*/
 
-  //log("r:%d\tg:%d\tb:%d\n", red, green, blue);
+	red = (gamma10[red] * pwm_period) >> RAMP_BITS;
+	green = (gamma10[green] * pwm_period) >> RAMP_BITS;
+	blue = (gamma10[blue] * pwm_period) >> RAMP_BITS;
 
-  pwm_set_duty(red, 0);
-  pwm_set_duty(green, 1);
-  pwm_set_duty(blue, 2);
-  pwm_start(); // commit
+	//log("r:%d\tg:%d\tb:%d\n", red, green, blue);
 
-  delay(10);
+	pwm_set_duty(red, 0);
+	pwm_set_duty(green, 1);
+	pwm_set_duty(blue, 2);
+	pwm_start(); // commit
+
+	delay(10);
 
 }

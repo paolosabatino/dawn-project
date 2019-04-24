@@ -36,8 +36,6 @@ div.radio-mode {
 	height: 240px;
 	padding: 1%;
 	margin: 1%;
-	box-shadow: inset 0px 0px 10px 0px rgba(0,0,0,0.75);
-	
 }
 
 div#radio-mode-div {
@@ -170,4 +168,28 @@ div.info-box.warning {
 div.info-box.info {
 	background-color: #3c3;
 	border-bottom: 2px solid #060;
+}
+
+div.mode {
+	display: inline-block;
+	height: 300px;
+	color: rgba(216, 216, 216, 1.0);
+	text-align: center;
+	background: rgba(0, 0, 0, 0.35);
+}
+
+div.mode i {
+	font-size: 18em;
+}
+
+div.mode:hover i.fa-power-off {
+	color: rgba(0, 0, 0, 0.7);
+}
+
+div.mode:hover i.fa-tint {
+	color: rgba(240, 128, 32, 0.9);
+}
+
+div.mode:hover i.fa-sun {
+	color: rgba(240, 240, 64, 0.9);
 }
