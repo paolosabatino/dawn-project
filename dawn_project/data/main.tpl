@@ -13,7 +13,7 @@
 	<link rel="stylesheet" href="all.min.css" type="text/css" media="screen">
 	<link rel="stylesheet" href="main.css" type="text/css" media="screen">
 
-	<script type="text/javascript" src="jquery-3.3.1.slim.min.js"></script>
+	<script type="text/javascript" src="jquery-3.4.1.min.js"></script>
 	<script type="text/javascript" src="bootstrap.min.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 
@@ -49,20 +49,43 @@
 
 		<div class="card-deck">
 			<div class="card">
-				<div class="card-body mode">
+				<div class="card-body mode off-mode">
 					<i class="fas fa-power-off"></i>
 				</div>
 			</div>
 			<div class="card">
-				<div class="card-body mode">
+				<div class="card-body mode color-mode">
 					<i class="fas fa-tint"></i>
 				</div>
 			</div>
 			<div class="card">
-				<div class="card-body mode">
+				<div class="card-body mode mood-mode">
 					<i class="fas fa-sun"></i>
 				</div>
 			</div>
+		</div>
+
+	</div>
+
+	<div
+		id="color-modes">
+
+		<div 
+			data-red="255"
+			data-green="255"
+			data-blue="255"
+			style="background: #eef"
+			class="color-box">
+
+		</div>
+
+		<div 
+			data-red="255"
+			data-green="160"
+			data-blue="0"
+			style="background: rgb(255,160,0)"
+			class="color-box">
+
 		</div>
 
 	</div>

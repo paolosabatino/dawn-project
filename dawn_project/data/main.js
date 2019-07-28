@@ -448,3 +448,74 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	});
 	
 });
+
+$(function() {
+
+	$("#off-mode").on("click", function(evt) {
+
+		$.post(
+			"/mode",
+			{
+				mode: 0
+			}
+		)
+
+	});
+
+	$(".color-mode").on("click", function(evt) {
+
+		var x = evt.pageX;
+		var y = evt.pageY;
+		var cmWidth;
+
+		console.log("page: ", evt.pageX, evt.pageY, "client:", evt.clientX, evt.clientY);
+
+		cmWidth = parseInt($("#color-modes").css("width"));
+
+		x = x - (cmWidth / 2);
+
+		$("#color-modes").css("left", x + "px").css("top", y + "px").addClass("shown");
+	
+	})
+	
+	$("#color-modes").on("mouseleave", function(evt) {
+
+		$("#color-modes").removeClass("shown");
+
+		console.log(evt);
+
+	});
+
+	$(".color-box").on("click", function (evt) {
+
+		var $this = $(this);
+		
+		var red = $this.attr("data-red");
+		var green = $this.attr("data-green");
+		var blue = $this.attr("data-blue");
+
+		$.post(
+			"/set",
+			{
+				red: red,
+				green: green,
+				blue: blue
+			}
+		);
+
+		$.post(
+			"/mode",
+			{
+				mode: 1
+			}
+		)
+
+		
+	});
+
+	console.log("ready");
+
+});
+
+
+

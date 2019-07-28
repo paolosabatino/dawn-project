@@ -193,3 +193,35 @@ div.mode:hover i.fa-tint {
 div.mode:hover i.fa-sun {
 	color: rgba(240, 240, 64, 0.9);
 }
+
+div#color-modes {
+	max-width: 60em;
+	width: auto;
+	height: auto;
+	padding: 0.5em;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: #fff;
+	opacity: 0.0;
+	transform: scale(0.0, 0.0);
+	transform-origin: top center;
+	transition: transform 0.5s, opacity 0.4s;
+}
+
+div#color-modes.shown {
+	opacity: 1.0;
+	transform: scale(1.0, 1.0);
+}
+
+div#color-modes div.color-box {
+	width: 8em;
+	height: 8em;
+	margin: 0.5em;
+	outline: solid 0.5em transparent;
+	display: inline-block;
+}
+
+div#color-modes div.color-box:hover {
+	outline: solid 0.5em rgba(0.0, 0.0, 0.0, 0.3);
+}
