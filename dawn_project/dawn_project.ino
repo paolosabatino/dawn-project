@@ -89,8 +89,8 @@ void defaultConfig() {
 void waitLoop(int dl) {
   int lt = millis();
   while (millis() - lt < dl) {
-//    delay(10);
-    yield();
+    delay(10);
+//    yield();
     if (ap_started == 1 || wifi_connected == 1) {
       serverHandleClient();
       handleOTA();
