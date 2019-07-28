@@ -133,6 +133,8 @@ void networkLoop() {
 
       if (WiFi.status() == WL_CONNECTED) {
 
+        WiFi.setSleepMode(WIFI_MODEM_SLEEP, 10);
+
         char localIp[16];
         WiFi.localIP().toString().toCharArray(localIp, 16);
         log("Connected to %s\nIP Address: %s\n", config.ssid, localIp);
@@ -198,7 +200,8 @@ void setup() {
   WiFi.begin();
   WiFi.setOutputPower(OUTPUT_POWER_DB);
   WiFi.softAPdisconnect(true);
-
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP, 10);
+  
   serverSetup(&config);
   log("HTTP server started\n");
 

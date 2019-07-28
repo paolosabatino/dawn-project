@@ -1,6 +1,10 @@
-#define RED_PIN 13
-#define GREEN_PIN 4
+/*
+ * Penelope's R=13, G=4, B=12 
+ */
+#define RED_PIN 4
+#define GREEN_PIN 13
 #define BLUE_PIN 12
+
 #define ANALOG_PIN A0
 
 #define MAX_RAMP 1023
@@ -20,7 +24,7 @@
 
 #define PWM_CHANNELS 3
 
-#define OUTPUT_POWER_DB 1
+#define OUTPUT_POWER_DB 0.5f
 
 #define LIGHT_CYCLE_INTERPERIOD 40
 
